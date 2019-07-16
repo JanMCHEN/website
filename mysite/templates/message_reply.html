@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block title %}与{{ username }}的消息{% endblock title %}
+{% block mainbody %}
+<main role="main" class="container">
+    <div class="card" style="width: 25rem;">
+        <div class="card-header" style="color: #00a0e9">Chat with {{ username }}
+            <button type="button" style="color: lime" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal1" data-whatever="{{ username }}">回复</button>
+            <div class="modal fade" id="exampleModal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">New message</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+            <form method="post" action="{% url 'blog:message' %}?next={{ request.path }}?to={{ username }}">
+                {% csrf_token %}
+          <div class="modal-body">
+              <div class="form-group">
+                <label for="recipient-name" class="col-form-label">给你发个消息</label>
+                <input type="text" class="form-control" id="recipient-name" name="@" value="{{ username }}" readonly placeholder="别想改我哟">
+              </div>
+              <div class="form-group">
+                <label for="message-text" class="col-form-label">消息内容</label>
+                <textarea class="form-control" id="message-text" name="message" placeholder="想发个啥呢"></textarea>
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Send message</button>
+          </div>
+            </form>
+        </div>
+                </div>
+            </div>
+        </div>
+    {% for message in messages %}
+      <div class="card-body">
+        <h5 class="card-title">{% if message.from_who.username == user.username %}我{% else %}@{{ other }}{% endif %}</h5>
+        <h6 class="card-subtitle mb-2 text-muted">{{ message.send_time }}</h6>
+        <p class="card-text">{{ message.content }}</p>
+      <hr>
+      </div>
+    {% endfor %}
+    </div>
+</main>
+{% endblock %}

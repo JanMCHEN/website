@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block js_file %}
+        {{ form.media }}
+{% endblock %}
+{% block title %}更改头像{% endblock title %}
+{% block mainbody %}
+<form method="post" name="head_ico" enctype="multipart/form-data">
+{#enctype参数绑定文件到form中，此例中由于没对form保存，应该可以不要#}
+{% csrf_token %}
+    <div>
+         {{ form.as_p }}
+    </div>
+    <br>
+        <div>
+            <input type="submit" value="提交" class="btn btn-primary" >
+        </div>
+</form>
+{% endblock %}

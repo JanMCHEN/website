@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}跳转页面{% endblock title %}
+{% block mainbody %}
+<body>
+<p>{{ info }}！还有<span id="sp">3</span>秒跳转...</p>
+<script>
+    onload=function () {
+        setInterval(go,1000)
+    };
+    var x=2;
+    function go() {
+
+        if (x>=0){
+            document.getElementById("sp").innerText=x;
+        }else {
+            location.href="{{ next }}";
+        }
+        x--;
+    }
+</script>
+</body>
+{% endblock %}

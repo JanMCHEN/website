@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}博客编辑{% endblock title %}
+{% block js_file %}
+    {{ form.media }}
+{% endblock %}
+{% block mainbody %}
+<main role="main" class="container">
+<hr>
+<form method="post">
+{% csrf_token %}
+    <div class="form-row">
+        </div>
+         {{ form.as_p }}
+    <br>
+        <div class="form-group">
+            <input type="submit" value="提交" class="btn btn-primary">
+        </div>
+</form>
+</main>
+{% endblock %}

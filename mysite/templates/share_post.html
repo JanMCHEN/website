@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block js_file %}
+        {{ form.media }}
+{% endblock %}
+{% block title %}分享{% endblock title %}
+{% block mainbody %}
+<main role="main" class="container">
+<form method="post" name="share" enctype="multipart/form-data">
+{#enctype="multipart/form-data"参数绑定文件到form中，此例中由于对form保存，需要#}
+{% csrf_token %}
+    <div>
+         {{ form.as_p }}
+    </div>
+    <br>
+        <div>
+            <input type="submit" value="提交" class="btn btn-primary" >
+        </div>
+</form>
+</main>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}房东的猫{% endblock title %}
+{% load staticfiles %}
+{% block mainbody %}
+<main role="main" class="container">
+    <div class="d-flex align-items-center p-3 my-3 text-white-50 bg-purple rounded shadow-sm">
+        <div class="lh-100">
+          <h6 class="mb-0 text-white lh-100">房猫与我</h6>
+            <a href="{% url 'blog:share' %}">(点我分享)</a>
+        </div>
+    </div>
+{% for share in share_page %}
+<div class="card mb-3">
+  <div class="card-body">
+{#    <h5 class="card-title">{{ share.auth.username }}</h5>#}
+    <p class="card-text">{{ share.description }}</p>
+    <p class="card-text"><small class="text-muted">{{ share.update_time }} by {{ share.auth.username }}</small></p>
+  </div>
+    {% if share.img %}
+  <img src="{{ share.img.url }}" class="card-img-top">
+    {% endif %}
+
+</div>
+{% endfor %}
+<nav aria-label="Page navigation example">
+  <ul class="pagination">
+    <li class="page-item {{ previous }}">
+      <a class="page-link" href="{{ request.path }}?page={{ p_page }}" aria-label="Previous">
+        <span aria-hidden="true">&laquo;</span>
+      </a>
+    </li>
+      {% for page in page_range_left %}
+    <li class="page-item "><a class="page-link" href="{{ request.path }}?page={{ page }}">{{ page }}</a></li>
+      {% endfor %}
+    <li class="page-item active"><a class="page-link" href="{{ request.path }}?page={{ c_page }}">{{ c_page }}</a></li>
+        {% for page in page_range_right %}
+    <li class="page-item "><a class="page-link" href="{{ request.path }}?page={{ page }}">{{ page }}</a></li>
+        {% endfor %}
+    <li class="page-item {{ next }} ">
+      <a class="page-link" href="{{ request.path }}?page={{ n_page }}" aria-label="Next">
+        <span aria-hidden="true">&raquo;</span>
+      </a>
+    </li>
+  </ul>
+</nav>
+</main>
+{% endblock %}

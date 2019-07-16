@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}{{ username }}的主页{% endblock title %}
+{% block mainbody %}
+<main role="main" class="container">
+<div class="card text-center">
+  <div class="card-header">
+    {{ username }}'s Home
+  </div>
+  <div class="card-body">
+    <h5 class="card-title">{{ create_time }}加入DREAMING</h5>
+    <img src="{{ head_ico }}" title="头像" height="200" width="100" style="cursor: pointer;" class="img-thumbnail">
+    {% if not not_self %}
+        <p class="card-text"> <a class="btn btn-primary" href="{% url 'blog:headpost' %}">修改头像</a></p>
+        <p class="card-text"> <a class="btn btn-primary" href="{% url 'blog:index' %}">修改资料</a></p>
+        <p class="card-text"> <a class="btn btn-primary" href="{% url 'blog:blog_add' %}">写博客</a></p>
+        <p class="card-text"> 我的消息:
+            <a href="{% url 'blog:message' %}">{{ message_all }}</a>
+            {% if message %}
+            <a href="{% url 'blog:message' %}?no_read=true" style="color: red">(未读{{ message }})</a>
+            {% endif %}
+        </p>
+        <p class="card-text"> 博客数:<a href="{% url 'blog:user_blog' %}">({{ blog_count }})</a></p>
+        <p class="card-text"> 收藏:
+            {% if collect_count > 0 %}
+            <a href="{% url 'blog:collect_blog' %}">({{ collect_count }})</a>
+            {% else %}
+            <b>还没有哟</b>
+            {% endif %}
+        </p>
+    {% else %}
+        <p class="card-text"> 博客数:<a href="{% url 'blog:other_blog' user_id %}">({{ blog_count }})</a></p>
+    {% endif %}
+    <p class="card-title"> 评论数:{{ comment_count }} </p>
+    <p class="card-title"> 获得评论数:{{ comments_count }}</p>
+    <p class="card-title"> 被赞:{{ love }} </p>
+  </div>
+  <div class="card-footer text-muted">
+    Welcome
+  </div>
+</div>
+</main>
+{% endblock %}

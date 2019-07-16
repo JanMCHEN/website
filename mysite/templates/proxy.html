@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block mainbody %}
+<main role="main" class="container">
+    <div>
+        当前ip池共有{{ ip_count }}个ip，有效约{{ ip_enable }}个
+        <p>
+            全部来源于网络免费代理ip，实时更新检测，但也不敢保证有效性，仅提供初级爬虫代理用
+        </p>
+        <p>
+            <a href="{% url 'proxy:proxy_get' %}">获取</a>
+        </p>
+        <p>
+            <a href="{% url 'proxy:proxy_get_many' 10 %}">获取多个</a>
+        </p>
+    </div>
+
+</main>
+{% endblock %}

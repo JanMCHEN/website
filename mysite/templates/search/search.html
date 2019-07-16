@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load highlight %}
+{% block mainbody %}
+<main role="main" class="container">
+    <div class="my-3 p-3 bg-white rounded shadow-sm" >
+    <style>
+        span.highlighted {
+            color: red;
+        }
+    </style>
+        <div class="d-flex align-items-center p-3 my-3 text-white-50 bg-purple rounded shadow-sm">
+        <div class="lh-100">
+          <h6 class="mb-0 text-white lh-100">{{ query }}的搜索结果:{{ page.paginator.count }}</h6>
+        </div>
+    </div>
+      {% for blog in page %}
+      <div class="list-group-item d-flex justify-content-between align-items-center">
+        <li class="blogtitle"><a href="{% url 'blog:blog' blog.object.blog_id %}" target="_blank">{% highlight blog.object.title with query %}</a></li>
+        <ul class="list-group">
+          <li>{{ blog.object.create_time }}by <a href="{% url 'blog:other_home' blog.object.author_name.user_id %}">{% highlight blog.object.author_name with query %}</a>
+          <span class="badge badge-primary badge-pill">{{ blog.object.look_times }}已阅读</span><span class="badge badge-primary badge-pill">{{ blog.object.love }}喜欢</span><span class="badge badge-primary badge-pill">{{ blog.comments_set.all|length }}评论</span></li>
+        </ul>
+      </div>
+      {% empty %}
+      <h4>还没有内容哟</h4>
+      {% endfor %}
+</div>
+    <div class="pagelist">
+    {% if page.has_other_pages %}
+        <p>当前页码:{{ page.number }}/{{ page.paginator.num_pages }}
+        {% if page.has_previous %}
+            {% if page.previous_page_number > 1  %}
+                <a href="{{ request.path }}?q={{ query }}&page=1">首页</a>
+            {% endif %}
+            <a href="{{ request.path }}?q={{ query }}&page={{ page.previous_page_number }}">上一页:{{ page.previous_page_number }}</a>
+        {% endif %}
+        {% if page.has_next %}
+            <a href="{{ request.path }}?q={{ query }}&page={{ page.next_page_number }}">下一页:{{ page.next_page_number }}</a>
+            {% if page.next_page_number > 1  %}
+                <a href="{{ request.path }}?q={{ query }}&page={{ page.paginator.num_pages }}">尾页</a>
+            {% endif %}
+        {% endif %}
+        </p>
+    {% endif %}
+    </div>
+</div>
+</main>
+{% endblock %}

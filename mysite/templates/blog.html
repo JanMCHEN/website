@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block js_file %}
+    {{ form.media }}
+    <script type="text/javascript">
+    function collect_blog(){
+            $.ajaxSetup({
+                data:{csrfmiddlewaretoken:'{{ csrf_token }}'},});
+           $.ajax({
+                type:'POST',
+                dataType:'json',
+                url:'{% url 'blog:collect' blog.blog_id  %}',
+                success:function(data){
+                    if(data.msg == 'ok'){
+                            $("#blog_collect").html(data.ret)
+                        }
+                    else{
+                        alert(data.msg);
+                        }
+                    }
+                    });
+            }
+    </script>
+    <script type="text/javascript">
+            function del() {
+                var msg = "您真的确定要删除吗？\n\n请确认！";
+                if (confirm(msg)==true){
+                return true;
+                }else{
+                return false;
+                }}
+    </script>
+    <script type="text/javascript">
+                    function likes_blog(){
+                    $.ajaxSetup({
+                        data:{csrfmiddlewaretoken:'{{ csrf_token }}'},});
+                   $.ajax({
+                        type:'POST',
+                        dataType:'json',
+                        url:'{% url 'blog:like' blog.blog_id  %}',
+                        success:function(data){
+                            if(data.msg == 'ok'){
+                                    $("#blog_like").html(data.likes)
+                                }
+                            else{
+                                alert(data.msg);
+                                }
+                            }
+                            });
+                    }
+    </script>
+{% endblock %}
+{% block mainbody %}
+<main role="main" class="container">
+<div class="col-md-8 blog-main">
+  <h3 class="pb-4 mb-4 font-italic border-bottom">
+    <a href="{% url 'blog:other_blog' blog.author_name.user_id %}">{{ blog.author_name }}的博客</a>
+  </h3>
+
+  <div class="blog-post">
+    <h1 class="blog-post-title">{{ blog.title }}</h1>
+    <h2 class="blog-post-meta">{{ blog.description }}</h2>
+    <p class="blog-post-meta">{{ blog.create_time }} by <a href="{% url 'blog:other_home' blog.author_name.user_id %}">{{ blog.author_name }}</a></p>
+    <p class="blog-post-meta">{{ blog.update_time }}更新<span class="badge badge-primary badge-pill">{{ blog.look_times }}阅读</span>
+        <li><span class="badge badge-primary badge-pill" id="blog_like">{{ blog.love }}</span><a href="javascript:likes_blog()" >喜欢</a></li>
+        {% if delete_able %}
+        <li>
+            <a href="{% url 'blog:blog_add' %}?blog_id={{ blog.blog_id }}">编辑</a>
+            <a href="{% url 'blog:blog_delete' %}?blog={{ blog.id }}" onclick="javascript:return del();">删除</a>
+        </li>
+        {% elif collect_able %}
+         <li><a id="blog_collect" href="javascript:collect_blog()">{{ ret }}</a></li>
+        {% endif %}
+        <li>-----------------------------正文开始----------------------------</li>
+    </p>
+    <ul>
+        {{ blog.body|safe }}
+    </ul>
+
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <hr>
+    <h4>我有话说</h4>
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'blog:comment' %}?blog_id={{ blog.blog_id }}&next={{ path }}">
+    {% csrf_token %}
+    <br>
+    <div class="form-row field-body">
+         {{ form }}
+    </div>
+    <br>
+        <div class="form-group">
+            <input type="submit" value="提交" class="btn btn-primary">
+        </div>
+</form>
+    {% else %}
+    <strong><a href="{% url 'blog:login' %}?next={{ request.path }}">登录</a>后才可评论哟</strong>
+    {% endif %}
+  <hr>
+  <div class="card">
+  <div class="card-header">
+    最新评论
+  </div>
+  {% for comment in comments %}
+    <div class="card-body">
+    <blockquote class="blockquote mb-0">
+    <p>{{ comment.content|safe }}</p>
+    <footer class="blockquote-footer">by <a href="{% url 'blog:other_home' comment.commenter.user_id %}">{{ comment.commenter }} {{ comment.create_time }}</a></footer>
+    </blockquote>
+    <hr>
+    </div>
+    {% empty %}
+    <h3>暂时没有评论哦</h3>
+  {% endfor %}
+</div>
+
+    </div>
+</div>
+</main>
+{% endblock %}

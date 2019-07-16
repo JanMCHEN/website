@@ -1,0 +1,5 @@
+# 指定根据表中的哪些数据建里索引
+{{ object.title }}
+{{ object.body }}
+{{ object.author_name.username }}
+{{ objects.description }}

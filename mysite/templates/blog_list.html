@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block title %}{{ username }}博客列表{% endblock title %}
+{% block mainbody %}
+<main role="main" class="container">
+<div class="my-3 p-3 bg-white rounded shadow-sm">
+    <div class="d-flex align-items-center p-3 my-3 text-white-50 bg-purple rounded shadow-sm">
+        <div class="lh-100">
+          <h6 class="mb-0 text-white lh-100">
+        {% if my_collect %}我的收藏
+        {% elif edit_stop %}{{ username }}的博客
+        {% else %}{{ user.username }}的博客
+        {% endif %}
+    </h6>
+        </div>
+    </div>
+      {% for blog in blog_page.object_list %}
+      <div class="list-group-item d-flex justify-content-between align-items-center">
+        <li class="blogtitle"><a href="{% url 'blog:blog' blog.blog_id %}" target="_blank">{{ blog.title }}</a></li>
+        <ul class="list-group">
+          <li>{{ blog.create_time }}by <a href="{% url 'blog:other_home' blog.author_name.user_id %}">{{ blog.author_name }}</a>
+          <span class="badge badge-primary badge-pill">{{ blog.look_times }}已阅读</span><span class="badge badge-primary badge-pill">{{ blog.love }}喜欢</span><span class="badge badge-primary badge-pill">{{ blog.comments_set.all|length }}评论</span></li>
+            {% if not edit_stop %}
+                <li class="button"><a href="{% url 'blog:blog_add' %}?blog_id={{ blog.blog_id }}">编辑</a> </li>
+            {% elif my_collect %}
+                <li class="button">
+                    <script type="text/javascript">
+                    function collect_blog(){
+                    $.ajaxSetup({
+                        data:{csrfmiddlewaretoken:'{{ csrf_token }}'},});
+                   $.ajax({
+                        type:'POST',
+                        dataType:'json',
+                        url:'{% url 'blog:collect' blog.blog_id  %}',
+                        success:function(data){
+                            if(data.msg == 'ok'){
+                                    $("#blog_collect").html(data.ret)
+                                }
+                            else{
+                                alert(data.msg);
+                                }
+                            }
+                            });
+                    }</script>
+                    <a id="blog_collect" href="javascript:collect_blog()">取消收藏</a> </li>
+            {% endif %}
+        </ul>
+      </div>
+      {% empty %}
+      <h4>还没有内容哟</h4>
+      {% endfor %}
+</div>
+    <div class="pagelist">
+    {% if blog_page.has_other_pages %}
+        <p>当前页码:{{ blog_page.number }}/{{ blog_page.paginator.num_pages }}
+        {% if blog_page.has_previous %}
+            {% if blog_page.previous_page_number > 1  %}
+                <a href="{{ request.path }}?page=1">首页</a>
+            {% endif %}
+            <a href="{{ request.path }}?page={{ blog_page.previous_page_number }}">上一页:{{ blog_page.previous_page_number }}</a>
+        {% endif %}
+        {% if blog_page.has_next %}
+            <a href="{{ request.path }}?page={{ blog_page.next_page_number }}">下一页:{{ blog_page.next_page_number }}</a>
+            {% if blog_page.next_page_number > 1  %}
+                <a href="{{ request.path }}?page={{ blog_page.paginator.num_pages }}">尾页</a>
+            {% endif %}
+        {% endif %}
+        </p>
+    {% endif %}
+    </div>
+</div>
+</main>
+{% endblock %}

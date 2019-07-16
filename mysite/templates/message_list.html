@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block title %}{{ user.username }}列表{% endblock title %}
+{% block mainbody %}
+<main role="main" class="container">
+  <div class="d-flex align-items-center p-3 my-3 text-white-50 bg-purple rounded shadow-sm">
+    <div class="lh-100">
+      <h6 class="mb-0 text-white lh-100">{{ user.username }}</h6>
+      <small>Since 2019</small>
+    </div>
+  </div>
+
+  <div class="my-3 p-3 bg-white rounded shadow-sm">
+    <h6 class="border-bottom border-gray pb-2 mb-0">{{ notice }}
+        <a href="{% url 'blog:message_reply' %}">全部标为已读</a>
+    </h6>
+      {% for message in messages %}
+    <div class="media text-muted pt-3">
+      <img class="bd-placeholder-img mr-2 rounded" width="32" height="32" src="{% if message.from_who.head_ico %}{{ message.from_who.head_ico.url }}{% else %}{{ head_ico }}{% endif %}" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: 32x32"><title>Placeholder</title><rect width="100%" height="100%" fill="#007bff"></rect></img>
+      <p class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+        <strong class="d-block text-gray-dark">
+            {% if message.from_who %}
+            <a href="{% url 'blog:other_home' message.from_who.user_id %}">@{{ message.from_who.username }}</a>
+            <span class="badge badge-pill">{{ message.send_time }}</span>
+            <a href="{% url 'blog:message_reply' %}?to={{ message.from_who.username }}">更多</a>
+            {% else %}
+            <span style="color: red">匿名消息</span>
+            <span class="badge badge-pill">{{ message.send_time }}</span>
+            {% endif %}
+            {% if not message.has_read %}
+            <span style="color: red">未读</span>
+            {% endif %}
+        </strong>
+            {{ message.content }}
+      </p>
+    </div>
+  {% endfor %}
+  </div>
+</main>
+
+{% endblock %}

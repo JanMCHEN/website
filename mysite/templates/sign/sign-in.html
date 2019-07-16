@@ -1,0 +1,37 @@
+{% extends 'sign/sign.html' %}
+{% block title %}欢迎登录{% endblock title %}
+{% block row %}
+<div class="col-md-4 col-md-push-8">
+    <!-- Start Sign In Form -->
+    <form class="fh5co-form animate-box" data-animate-effect="fadeInRight" method="post">
+        {% if notice %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <strong>{{ notice }}</strong>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+        </div>
+        {% endif %}
+        {% csrf_token %}
+        <h2>登录</h2>
+        <div class="form-group">
+            <label for="username" class="sr-only">Username</label>
+            <input type="text" class="form-control" id="username" placeholder="用户名" autocomplete="off" name="username" value={{ username }}>
+        </div>
+        <div class="form-group">
+            <label for="password" class="sr-only">Password</label>
+            <input type="password" class="form-control" id="password" placeholder="密码" autocomplete="off" name="password" value={{ password }}>
+        </div>
+        <div class="form-group">
+            <label for="remember"><input type="checkbox" id="remember" name="remember" {{ checked }}> Remember Me</label>
+        </div>
+        <div class="form-group">
+            <p>还没注册? <a href={% url 'blog:signup' %}>注册</a> | <a href="forgot.html">忘记密码?</a></p>
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Sign In" class="btn btn-primary">
+        </div>
+    </form>
+    <!-- END Sign In Form -->
+</div>
+{% endblock row %}
