@@ -2,12 +2,10 @@
 django learn
 django 搭建个人博客网站，nginx负载均衡在两台服务器上有部署，支持注册、登录、写博客、点赞、收藏、上传头像、ip代理池获取、发图、评论等，集成百度ueditor编辑器，fastdfs分布式存储、haystack全文搜索
 
-部署过程：
-
-系统编码：
+## 部署过程
+# 系统编码
 echo 'export LANG="en_US.UTF-8' >> ~/.bash_profile
-
-| pyenv:
+# pyenv
 debian ubantu依赖：
 sudo apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl git
 centos依赖：
@@ -34,8 +32,6 @@ pyenv virtualenv 3.6.4 env-3.6.4 # 创建3.6.4版本的虚拟环境
 # 时区
 timedatectl set-timezone Asia/Shanghai
 timedatectl status
-# 编码
-echo 'export LANG=en_US.UTF-8' >> ~/.bash_profile
 ---------------------------------------------------------------
 pip freeze > requirements.txt
 pip install -r 路径
