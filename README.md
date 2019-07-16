@@ -145,27 +145,28 @@ client = Fdfs_client(client_conf_obj)
 ret = client.upload_by_filename('test')
 
 
-uwsgi配置：   （加入到开机启动项：echo "uwsgi -c /usr/local/nginx/conf/nginx.conf" >> /etc/rc.local
+# uwsgi配置：   
+（加入到开机启动项：echo "uwsgi -c /usr/local/nginx/conf/nginx.conf" >> /etc/rc.local
 [uwsgi]
 #使用nginx连接时使用
 ;socket=127.0.0.1:8080
 #直接做web服务器使用 相当于 python manage.py runserver ip:port
 http=127.0.0.1:8000
-# 项目目录
+#项目目录
 chdir=/www/
-# 项目中wsgi.py文件的目录，相对于项目目录
+#项目中wsgi.py文件的目录，相对于项目目录
 wsgi-file=mysite/wsgi.py
-# 指定工作的进程数
+#指定工作的进程数
 processes=4
-# 指定工作进程中的线程数
+#指定工作进程中的线程数
 threads=2
-# 主进程
+#主进程
 master=true
-# 保存启动之后主进程的pid,用于脚本启动、停止该进程
+#保存启动之后主进程的pid,用于脚本启动、停止该进程
 pidfile=uwsgi.pid
-# 设置uwsgi后台运行，保存日志信息
+#设置uwsgi后台运行，保存日志信息
 daemonize=uwsgi.log
-# 设置虚拟环境的路径
+#设置虚拟环境的路径
 virtualenv=/root/.pyenv/versions/3.6.8/envs/Dweb
 env = LANG=en_US.UTF-8
 
