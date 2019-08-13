@@ -23,6 +23,7 @@ urlpatterns = [
     path('blog/<str:blog_id>/', views.BlogView.as_view(), name='blog'),
     path('blog/<str:blog_id>/like/', views.LikeView.as_view(), name='like'),
     path('blog/<str:blog_id>/collect/', views.CollectView.as_view(), name='collect'),
+    path('active/', views.UserActive.as_view(), name='active'),
     path('<str:user_id>/', views.OtherHome.as_view(), name='other_home'),
     path('<str:user_id>/blog/', views.OtherBlog.as_view(), name='other_blog'),
 

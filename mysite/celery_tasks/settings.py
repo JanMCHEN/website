@@ -1,0 +1,10 @@
+BROKER = 'redis://:cjm0719@127.0.0.1:6379/8'
+# 邮件服务器
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.163.com'
+EMAIL_PORT = '25'
+EMAIL_HOST_USER = 'dreamingc@163.com'
+EMAIL_HOST_PASSWORD = 'cjm666'
+EMAIL_FROM = 'DREAMING<dreamingc@163.com>'
+EMAIL_SUBJECT = 'DREAMING博客激活邮件'
+SECRET_KEY = 'cjm666'

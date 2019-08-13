@@ -1,3 +1,5 @@
+# Create your views here.
+# coding=utf-8
 from django.shortcuts import render, redirect, reverse, Http404
 from django.http import JsonResponse
 from .models import Articles, User, Comments, LikeCollect, Share, Message
@@ -11,12 +13,20 @@ from utils.mixin import LoginRequiredMixIn
 from django.db.models import Q              # or查询
 # 分页模块
 from django.core.paginator import Paginator
-# Create your views here.
-# coding=utf-8
+
+from celery_tasks.task import send_email
+
+# 加密模块
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from itsdangerous.exc import SignatureExpired, BadSignature
+serializer = Serializer('cjm666', 7200)
 
 
 def get_user_info(user, self=True):
-    '''获取用户详细信息'''
+    """获取用户详细信息
+    user: class:User
+    self: [bool:True]表示自己访问
+    """
     info = {}
     try:
         blog_all = user.articles_set.all().order_by('-update_time')
@@ -26,7 +36,7 @@ def get_user_info(user, self=True):
         # 用户评论数
         info['comment_count'] = user.comments_set.all().count()
     except:
-        return {}
+        return {'username': '厉害了亲，怎么访问的'}
     # 用户头像
     if user.head_ico:
         info['head_ico'] = user.head_ico.url
@@ -55,9 +65,11 @@ def get_user_info(user, self=True):
     return info
 
 
-# class TestUEditorForm(Form):
-#     Description = UEditorField(label="内容", width=600, height=300, toolbars="full", imagePath="", filePath="",
-#                                upload_settings={"imageMaxSize": 1204000})
+def active_email(user):
+    # 邮件发送
+    confirm = {'id': user.user_id}
+    token = serializer.dumps(confirm).decode()
+    send_email.delay(user.email, user.username, token)
 
 
 class ArticlesUeditorModelForm(forms.ModelForm):
@@ -113,13 +125,18 @@ class Index(View):
 
 
 class About(View):
-    '''关于我类视图'''
+    """
+    关于我类视图
+    """
     def get(self, request):
 
         return render(request, 'about.html')
 
 
 class ShareView(View):
+    """
+    分享类视图
+    """
     def get(self, request):
         share = Share.objects.all().order_by('-update_time')
         share_page = Paginator(share, 5)
@@ -163,6 +180,9 @@ class ShareView(View):
 
 
 class SharePost(LoginRequiredMixIn, View):
+    """
+    上传分享
+    """
     def get(self, request):
         form = SharePostForm()
         return render(request, 'share_post.html', {'form': form})
@@ -209,7 +229,9 @@ class AllBlog(View):
 
 
 class UserBlog(LoginRequiredMixIn, View):
-    '''用户个人博客管理类视图'''
+    """
+    用户个人博客管理类视图
+    """
     def get(self, request):
         # 所有博客
         blog_all = request.user.articles_set.all().order_by('-create_time')
@@ -228,7 +250,9 @@ class UserBlog(LoginRequiredMixIn, View):
 
 
 class CollectBlog(LoginRequiredMixIn, View):
-    '''用户个人收藏显示管理类视图'''
+    """
+    用户个人收藏显示管理类视图
+    """
     def get(self, request):
         # 下面获取到的只是一个LikeCollect对象
         blog_all_collect = request.user.likecollect_set.filter(collected=True)
@@ -252,7 +276,9 @@ class CollectBlog(LoginRequiredMixIn, View):
 
 
 class OtherBlog(View):
-    '''浏览其他用户博客列表类视图'''
+    """
+    浏览其他用户博客列表类视图
+    """
     def get(self, request, user_id):
         # 所有博客
         try:
@@ -279,7 +305,9 @@ class OtherBlog(View):
 
 
 class UserView(LoginRequiredMixIn, View):
-    '''用户界面管理类'''
+    """
+    用户界面管理类
+    """
     def get(self, request):
         info = get_user_info(request.user)
         # 收藏数
@@ -292,7 +320,9 @@ class UserView(LoginRequiredMixIn, View):
 
 
 class HeadPostView(LoginRequiredMixIn, View):
-    '''上传图像类视图'''
+    """
+    上传图像类视图
+    """
     def get(self, request):
         return render(request, 'headpost.html', {'form': HeadPostModelForm()})
 
@@ -308,7 +338,9 @@ class HeadPostView(LoginRequiredMixIn, View):
 
 
 class OtherHome(View):
-    '''其他用户信息浏览类视图'''
+    """
+    其他用户信息浏览类视图
+    """
     def get(self, request, user_id):
         try:
             user = User.objects.get(user_id=user_id)
@@ -324,7 +356,9 @@ class OtherHome(View):
 
 
 class BlogView(View):
-    '''博客详细信息显示类视图'''
+    """
+    博客详细信息显示类视图
+    """
     def get(self, request, blog_id):
         try:
             blog = Articles.objects.get(blog_id=blog_id)
@@ -360,10 +394,10 @@ class BlogView(View):
 
 
 class LikeView(LoginRequiredMixIn, View):
-    '''
+    """
     点赞类视图
     自己可已给自己点赞
-    '''
+    """
     def post(self, request, blog_id):
         try:
             blog = Articles.objects.get(blog_id=blog_id)
@@ -392,10 +426,10 @@ class LikeView(LoginRequiredMixIn, View):
 
 
 class CollectView(LoginRequiredMixIn, View):
-    '''
+    """
     收藏类视图
     自己不可以收藏自己的
-    '''
+    """
     def post(self, request, blog_id):
         try:
             blog = Articles.objects.get(blog_id=blog_id)
@@ -414,8 +448,12 @@ class CollectView(LoginRequiredMixIn, View):
 
 
 class BlogAdd(LoginRequiredMixIn, View):
-    ''' 写博客类视图 '''
+    """
+    写博客类视图
+    """
     def get(self, request):
+        if not request.user.is_active:
+            raise Http404('账户未激活')
         # 判断url后面'？blog_id='有无内容决定是添加博客还是编辑博客
         if request.GET.get('blog_id'):
             # 有则判断博客存在否并提交给post
@@ -429,6 +467,8 @@ class BlogAdd(LoginRequiredMixIn, View):
         return render(request, 'blog_edit.html', {'form': form})
 
     def post(self, request):
+        if not request.user.is_active:
+            raise Http404('账户未激活')
         form = ArticlesUeditorModelForm(request.POST)
         if not form.is_valid():
             return render(request, 'blog_edit.html', {'form': form})
@@ -461,6 +501,7 @@ class BlogAdd(LoginRequiredMixIn, View):
 
 
 class BlogDelete(LoginRequiredMixIn, View):
+    """删除博客"""
     def get(self, request):
         blog_id = request.GET.get('blog')
         try:
@@ -472,8 +513,12 @@ class BlogDelete(LoginRequiredMixIn, View):
 
 
 class CommentEdit(LoginRequiredMixIn, View):
-    '''评论提交类视图'''
+    """
+    评论提交类视图
+    """
     def post(self, request):
+        if not request.user.is_active:
+            raise Http404('账户未激活')
         blog_id = request.GET.get('blog_id', '')
         if blog_id:
             try:
@@ -493,7 +538,9 @@ class CommentEdit(LoginRequiredMixIn, View):
 
 
 class MessageView(View):
-    '''消息管理类视图'''
+    """
+    消息管理类视图
+    """
     def get(self, request):
         # 消息列表
         info = {'notice': '我的消息'}
@@ -548,6 +595,7 @@ class MessageView(View):
 
 
 class MessageReply(LoginRequiredMixIn, View):
+    """发送消息"""
     def get(self, request):
         username = request.GET.get('to')
         if username:
@@ -567,8 +615,9 @@ class MessageReply(LoginRequiredMixIn, View):
 
 
 class SignUp(View):
-    '''注册类视图'''
-
+    """
+    注册类视图
+    """
     def get(self, request):
         # 处理get请求
         return render(request, 'sign/sign-up.html')
@@ -610,17 +659,23 @@ class SignUp(View):
             if not exist_user:
                 # 生成用户uuid
                 user_id = str(uuid1()).split('-')[0]
-                User.objects.create_user(username=username, email=email, password=password, user_id=user_id)         # 不能用create，过不了用户认证
-                # 反向解析
+                User.objects.create_user(username=username, email=email, password=password, user_id=user_id,
+                                         is_active=False)
                 response = redirect(reverse('blog:index'))
                 # 判断是否记住用户名,只在注册成功后加cookies
                 if remember == 'on':
                     # 只能一条一条加和删
                     response.set_cookie('username', username, max_age=cookies_age)
-                    response.set_cookie('password', password, max_age=cookies_age)
                 else:
                     response.delete_cookie('username')
-                    response.delete_cookie('password')
+
+                user = User.objects.get(username=username)
+
+                # 邮件发送
+                active_email(user)
+
+                # 登录
+                login(request, user)
                 return response
         else:
             info['notice'] = '两次密码不一致'
@@ -629,7 +684,7 @@ class SignUp(View):
 
 
 class SignIn(View):
-    '''登录类视图'''
+    """登录类视图"""
     def get(self, request):
         # 判断用户是否已登陆 登录后跳转到
         if request.user.is_authenticated:
@@ -663,7 +718,7 @@ class SignIn(View):
 
         # 验证用户名密码
         user = authenticate(username=username, password=password)
-        if user:
+        if user is not None:
             # 用户密码正确
             # 判断是否记住用户名
             response = redirect(next_url)
@@ -698,6 +753,27 @@ class Forget(View):
         # 其他验证身份方式  验证码 发修改邮件
         # newpass = request.POST.get('pass')
         return redirect(reverse('blog:login'))
+
+
+class UserActive(View):
+    def get(self, request):
+        token = request.GET.get('token')
+        try:
+            user_id = serializer.loads(token)['id']
+            user = User.objects.get(user_id=user_id)
+            user.is_active = True
+            user.save()
+            login(request, user)
+            return redirect(reverse('blog:user_info'))
+        except SignatureExpired:
+            if request.user.is_authenticated and not request.user.is_active:
+                # 重新邮件发送
+                active_email(request.user)
+            return render(request, 'redirect.html', {'info': '链接已过期，请在登录状态下点击此链接即可重新发送激活邮件',
+                                                     'next': reverse('blog:user_info')})
+        except:
+            return redirect(reverse('blog:index'))
+
 
 
 

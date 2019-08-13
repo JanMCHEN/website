@@ -17,7 +17,6 @@ class User(AbstractUser, BaseModel):
     head_ico = models.ImageField(verbose_name='头像', upload_to='head_ico', default='', blank=True)
     user_id = models.CharField(verbose_name='用户uuid', default=str(uuid1()).split('-')[3], max_length=10)
     description = models.CharField(verbose_name='用户描述', default='', max_length=500)
-    # head_ico.save()
 
     class Meta:
         db_table = 'df_user'

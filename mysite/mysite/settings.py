@@ -20,10 +20,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ''
+SECRET_KEY = 'ab18761828912387829auusnjkasduasyhduiasjasjhdsad'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 # 配置外网访问
 ALLOWED_HOSTS = ['*']
@@ -86,11 +86,9 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'django',
-        'USER': 'django',
-        'PASSWORD': '',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
+        'OPTIONS': {
+            'read_default_file': './mysite/my.cnf',
+        },
     }
 }
 
@@ -112,6 +110,9 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+# 不验证is_active
+AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.AllowAllUsersModelBackend']
 
 
 # Internationalization
@@ -168,7 +169,7 @@ CACHES = {
         "LOCATION": "redis://127.0.0.1:6379/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "PASSWORD": "",
+            "PASSWORD": "cjm0719",
         }
     }
 }
@@ -186,10 +187,4 @@ CUSTOM_STORAGE_OPTIONS = {
     'CLIENT_CONF': './utils/fdfs_client.conf',
     'BASE_URL': SERVER_IP + ':8888/',
 }
-# UEDITOR_SETTINGS={ "config":{ #这里放ueditor.config.js里面的配置项....... }, "upload":{ #这里放php/config.json里面的配置项....... } }
-# 配置访问路径，现文件只存在于一个服务器上
-# UEDITOR_SETTINGS = {"upload": {'imageUrlPrefix': SERVER_IP+':1082', 'scrawlUrlPrefix': SERVER_IP+':1082',
-#                                'snapscreenUrlPrefix': SERVER_IP+':1082', 'fileUrlPrefix': SERVER_IP+':1082',
-#                                "videoUrlPrefix": SERVER_IP+':1082'}
-#                    }
 
