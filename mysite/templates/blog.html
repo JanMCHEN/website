@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block js_file %}
+    {% load static %}
     {{ form.media }}
     <script type="text/javascript">
     function collect_blog(){
@@ -50,8 +51,9 @@
     </script>
 {% endblock %}
 {% block mainbody %}
+
 <main role="main" class="container">
-<div class="col-md-8 blog-main">
+<div class="blog-main">
   <h3 class="pb-4 mb-4 font-italic border-bottom">
     <a href="{% url 'blog:other_blog' blog.author_name.user_id %}">{{ blog.author_name }}的博客</a>
   </h3>
@@ -70,25 +72,17 @@
         {% elif collect_able %}
          <li><a id="blog_collect" href="javascript:collect_blog()">{{ ret }}</a></li>
         {% endif %}
-        <li>-----------------------------正文开始----------------------------</li>
     </p>
-    <ul>
-        {{ blog.body|safe }}
-    </ul>
+   <div id="md2html" class="markdown-body editormd-preview-container">
+       <textarea style="display:none;">{{ blog.body }}</textarea>
+   </div>
 
-  <br>
-  <br>
-  <br>
-  <br>
-  <br>
-  <hr>
-    <h4>我有话说</h4>
     {% if user.is_authenticated %}
     <form method="post" action="{% url 'blog:comment' %}?blog_id={{ blog.blog_id }}&next={{ path }}">
     {% csrf_token %}
     <br>
     <div class="form-row field-body">
-         {{ form }}
+        {{ form.as_p }}
     </div>
     <br>
         <div class="form-group">
@@ -104,7 +98,7 @@
     最新评论
   </div>
   {% for comment in comments %}
-    <div class="card-body">
+    <div class="markdown-body editormd-preview-container">
     <blockquote class="blockquote mb-0">
     <p>{{ comment.content|safe }}</p>
     <footer class="blockquote-footer">by <a href="{% url 'blog:other_home' comment.commenter.user_id %}">{{ comment.commenter }} {{ comment.create_time }}</a></footer>
@@ -119,4 +113,22 @@
     </div>
 </div>
 </main>
+    <script src="{% static  'mdeditor/js/lib/marked.min.js' %}"></script>
+  <script type="text/javascript">
+    $(function() {
+
+	    editormd.markdownToHTML("md2html", {
+            path: "{% static  'mdeditor/js/lib/' %}",
+            tocm: true,
+            emoji:true,
+            flowChart: true,
+            sequenceDiagram: true,
+            pageBreak: true,
+            tex: true,
+            //markdown : "1",// Also, you can dynamic set Markdown text
+            htmlDecode : true,  // Enable / disable HTML tag encode.
+            // htmlDecode : "style,script,iframe",  // Note: If enabled, you should filter some dangerous HTML tags for website security.
+        });
+    });
+    </script>
 {% endblock %}

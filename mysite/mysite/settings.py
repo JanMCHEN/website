@@ -41,6 +41,7 @@ INSTALLED_APPS = [
 
     # django-u-editor 富文本编辑器
     'DjangoUeditor',
+    'mdeditor',
 
     # haystack全文搜索框架
     'haystack',
@@ -187,4 +188,17 @@ CUSTOM_STORAGE_OPTIONS = {
     'CLIENT_CONF': './utils/fdfs_client.conf',
     'BASE_URL': SERVER_IP + ':8888/',
 }
+
+MDEDITOR_CONFIGS = {'less': {
+    'width': '80%',
+    'height': 100,
+    'toolbar': ["undo", "redo", "|",
+                "bold", "del", "italic", "quote",
+                "h3", "h5", "h6", "|",
+                "list-ul", "list-ol", "hr", "|",
+                "link", "reference-link", "image", "code", "preformatted-text", "code-block", "table", "datetime",
+                "emoji", "html-entities", "pagebreak", "|",
+                "||", "preview", "watch"],
+
+}, }
 

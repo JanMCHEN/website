@@ -15,10 +15,11 @@ from django.db.models import Q              # or查询
 from django.core.paginator import Paginator
 
 from celery_tasks.task import send_email
+from markdown import markdown
 
 # 加密模块
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
-from itsdangerous.exc import SignatureExpired, BadSignature
+from itsdangerous.exc import SignatureExpired
 serializer = Serializer('cjm666', 7200)
 
 
@@ -66,10 +67,20 @@ def get_user_info(user, self=True):
 
 
 def active_email(user):
-    # 邮件发送
+    # 激活邮件发送
+    if user.is_active:
+        return
     confirm = {'id': user.user_id}
     token = serializer.dumps(confirm).decode()
     send_email.delay(user.email, user.username, token)
+
+
+def md_html(contents):
+    for content in contents:
+        content.content = markdown(content.content, extensions=['markdown.extensions.codehilite',
+                                                                'markdown.extensions.toc',
+                                                                'markdown.extensions.extra'])
+        yield content
 
 
 class ArticlesUeditorModelForm(forms.ModelForm):
@@ -372,7 +383,7 @@ class BlogView(View):
             Articles.objects.filter(blog_id=blog_id).update(look_times=look_times)
             blog = Articles.objects.get(blog_id=blog_id)
         form = CommentsUeditorModelForm()
-        info = {'blog': blog, 'comments': comments, 'form': form, 'path': request.path}
+        info = {'blog': blog, 'comments': md_html(comments), 'form': form, 'path': request.path}
         # 判断有无删除权限
         if request.user == blog.author_name:
             info['delete_able'] = True
@@ -453,7 +464,7 @@ class BlogAdd(LoginRequiredMixIn, View):
     """
     def get(self, request):
         if not request.user.is_active:
-            raise Http404('账户未激活')
+            raise Http404('账户未激活，请查看激活邮件')
         # 判断url后面'？blog_id='有无内容决定是添加博客还是编辑博客
         if request.GET.get('blog_id'):
             # 有则判断博客存在否并提交给post
@@ -468,7 +479,7 @@ class BlogAdd(LoginRequiredMixIn, View):
 
     def post(self, request):
         if not request.user.is_active:
-            raise Http404('账户未激活')
+            raise Http404('账户未激活，请查看激活邮件')
         form = ArticlesUeditorModelForm(request.POST)
         if not form.is_valid():
             return render(request, 'blog_edit.html', {'form': form})
@@ -518,7 +529,7 @@ class CommentEdit(LoginRequiredMixIn, View):
     """
     def post(self, request):
         if not request.user.is_active:
-            raise Http404('账户未激活')
+            raise Http404('账户未激活，请查看激活邮件')
         blog_id = request.GET.get('blog_id', '')
         if blog_id:
             try:
@@ -742,8 +753,9 @@ class Logout(View):
         return redirect(reverse('blog:login'))
 
 
+# TODO 修改资料还未实现
 class Forget(View):
-    '''找回密码类视图'''
+    '''找回密码类视图，未实现'''
     def get(self, request):
         return render(request, 'sign/forget.html')
 

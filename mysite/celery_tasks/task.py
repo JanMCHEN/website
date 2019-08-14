@@ -1,5 +1,5 @@
 from celery import Celery
-from django.core.mail import send_mail, get_connection
+from django.core.mail import send_mail
 from .settings import *
 import django
 import os

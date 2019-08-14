@@ -5,6 +5,7 @@ from django.conf import settings
 
 # 富文本编辑器
 from DjangoUeditor.models import UEditorField
+from mdeditor.fields import MDTextField
 
 from django.contrib.auth.models import AbstractUser
 from django.contrib import admin
@@ -29,15 +30,12 @@ class Articles(BaseModel):
     author_name = models.ForeignKey('User', verbose_name='作者', on_delete=models.CASCADE)
     blog_id = models.CharField(verbose_name='文章标识符', default=str(uuid1()).split('-')[0], max_length=15)
     title = models.CharField(max_length=50, verbose_name='文章标题')
-    body = UEditorField(width='100%', height=300, toolbars="full",
-                        imagePath="images/%(basename)s_%(datetime)s.%(extname)s",
-                        filePath="files/", upload_settings={"imageMaxSize": 10240000}, command=None,
-                        blank=False, verbose_name='正文')
+    body = MDTextField(blank=False, verbose_name='正文', default='welcome')
 
     love = models.IntegerField(default=0, verbose_name='点赞人数')
     look_times = models.IntegerField(default=0, verbose_name='浏览次数')
     is_secret = models.BooleanField(default=False, verbose_name='仅自己可见')
-    description = models.CharField(verbose_name='文章描述', default='', max_length=50)
+    description = models.CharField(verbose_name='文章描述', default='', max_length=50, blank=True)
 
     class Meta:
         db_table = 'df_articles'
@@ -50,9 +48,7 @@ class Comments(BaseModel):
     commenter = models.ForeignKey('User', verbose_name='评论者', on_delete=models.CASCADE)
     article = models.ForeignKey('Articles', verbose_name='评论文章', on_delete=models.CASCADE)
     # 新加一个字段时注意要有default
-    content = UEditorField(width='100%', height=50, toolbars="mini", imagePath="comments/", filePath="comments/",
-                           upload_settings={"imageMaxSize": 1024000},
-                           settings={'maximumWords': 150}, blank=False, default='', verbose_name='')
+    content = MDTextField(blank=False, config_name='less', default='', verbose_name='评论')
     love = models.IntegerField(default=0, verbose_name='赞同人数')
 
     class Meta:
