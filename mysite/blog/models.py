@@ -86,7 +86,7 @@ class Share(BaseModel):
     """
     auth = models.ForeignKey('User', verbose_name='分享者', on_delete=models.CASCADE)
     description = models.CharField(verbose_name='描述', default='', max_length=200, blank=True)
-    img = models.ImageField(verbose_name='分享图片', upload_to='share_img', default='', blank=True)
+    img = models.ImageField(verbose_name='分享图片', upload_to='share_img', default='', blank=False)
 
     class Meta:
         db_table = 'df_share'

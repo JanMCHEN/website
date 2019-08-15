@@ -67,7 +67,7 @@ def get_user_info(user, self=True):
 
 
 def active_email(user):
-    # 激活邮件发送
+    """发送激活邮件"""
     if user.is_active:
         return
     confirm = {'id': user.user_id}
@@ -75,13 +75,22 @@ def active_email(user):
     send_email.delay(user.email, user.username, token)
 
 
-def md_html(contents):
-    for i, content in enumerate(contents):
-        # content.content = markdown(content.content, extensions=['markdown.extensions.extra',
-        #                                                         'markdown.extensions.codehilite',
-        #                                                         'markdown.extensions.toc'])
-        content.id = i
-        yield content
+# TODO 暂时先这样生成摘要，有待改进
+def md2summary(content):
+    """自动获取markdown摘要
+    只获取其中标题文本"""
+    return ','.join(re.findall('#+\s+(\S+)', content)[:6])[:50]
+
+
+def id_add(models):
+    """
+    为模型添加id属性，方便html标签引用
+    :param models: 模型类
+    :return:
+    """
+    for i in range(len(models)):
+        models[i].id = i
+        yield models[i]
 
 
 class ArticlesEditorModelForm(forms.ModelForm):
@@ -93,7 +102,7 @@ class ArticlesEditorModelForm(forms.ModelForm):
 
         # 自定义表单格式
         widgets = {
-            'description': forms.Textarea(attrs={'cols': 50, 'rows': 2, 'placeholder': '简单描述一下你的文章内容更有利于别人发现哟'}),
+            'description': forms.Textarea(attrs={'cols': 50, 'rows': 2, 'placeholder': '为空时自动生成摘要'}),
         }
 
 
@@ -384,7 +393,7 @@ class BlogView(View):
             Articles.objects.filter(blog_id=blog_id).update(look_times=look_times)
             blog = Articles.objects.get(blog_id=blog_id)
         form = CommentsEditorModelForm()
-        info = {'blog': blog, 'comments': md_html(comments), 'form': form, 'path': request.path}
+        info = {'blog': blog, 'comments': id_add(comments), 'form': form, 'path': request.path}
         # 判断有无删除权限
         if request.user == blog.author_name:
             info['delete_able'] = True
@@ -488,20 +497,22 @@ class BlogAdd(LoginRequiredMixIn, View):
         title = form.cleaned_data.get('title')
         body = form.cleaned_data.get('body')
         description = form.cleaned_data.get('description')
+        if not description:
+            description = md2summary(body)
 
         if request.GET.get('blog_id'):
             # 编辑博客
             try:
                 blog = request.user.articles_set.get(blog_id=request.GET.get('blog_id'))
-                blog.title = title
-                blog.body = body
-                blog.description = description
-                if form.cleaned_data.get('is_secret') == 'on':
-                    blog.is_secret = True
-                blog.save()
-                return redirect(reverse('blog:user_blog'))
             except Articles.DoesNotExist:
                 raise Http404('没有该文章')
+            blog.title = title
+            blog.body = body
+            blog.description = description
+            if form.cleaned_data.get('is_secret') == 'on':
+                blog.is_secret = True
+            blog.save()
+            return redirect(reverse('blog:user_blog'))
 
         else:
             # 添加博客
