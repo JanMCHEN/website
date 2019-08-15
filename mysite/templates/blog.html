@@ -67,6 +67,21 @@
         });
     });
     </script>
+    <script type="text/javascript">
+    function more_comments(page) {
+        $.ajax({
+            type:'GET',
+            dataType:'json',
+            url:'{% url 'blog:comment' %}?blog_id={{ blog.blog_id }}&page='+ page ,
+            success:function(data){
+                $("#more_comments").remove();
+
+                $("#comments").append(data.comment);
+                }
+                });
+
+    }
+    </script>
 {% endblock %}
 {% block mainbody %}
 
@@ -113,34 +128,15 @@
   <hr>
   <div class="card">
   <div class="card-header">
-    最新评论
+    最新评论({{ comments_count }})
   </div>
-  {% for comment in comments %}
-    <div class="markdown-body editormd-preview-container">
-    <blockquote class="blockquote mb-0">
-{#    <p>{{ comment.content|safe }}</p>#}
-        <div id="{{ comment.id }}-comments-md">
-            <textarea style="display:none;">{{ comment.content }}</textarea>
-        </div>
-        <script type="text/javascript">
-            $(function() {
-
-                editormd.markdownToHTML("{{ comment.id }}-comments-md", {
-                    path: "{% static  'mdeditor/js/lib/' %}",
-                    emoji:true,
-                });
-            });
-        </script>
-    <footer class="blockquote-footer">by <a href="{% url 'blog:other_home' comment.commenter.user_id %}">{{ comment.commenter }} {{ comment.create_time }}</a></footer>
-    </blockquote>
-    <hr>
-    </div>
-    {% empty %}
-    <h3>暂时没有评论哦</h3>
-  {% endfor %}
+  <div class="markdown-body editormd-preview-container" id="comments">
+      <script type="text/javascript">
+          $("#comments").load(more_comments(1))
+      </script>
+  </div>
 </div>
-
-    </div>
+  </div>
 </div>
 </main>
 {% endblock %}

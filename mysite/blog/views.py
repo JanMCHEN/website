@@ -6,6 +6,7 @@ from .models import Articles, User, Comments, LikeCollect, Share, Message
 from django.views.generic import View
 from django.contrib.auth import authenticate, login, logout
 from django import forms
+from django.template.loader import render_to_string
 import re
 import random
 from uuid import uuid1
@@ -80,17 +81,6 @@ def md2summary(content):
     """自动获取markdown摘要
     只获取其中标题文本"""
     return ','.join(re.findall('#+\s+(\S+)', content)[:6])[:50]
-
-
-def id_add(models):
-    """
-    为模型添加id属性，方便html标签引用
-    :param models: 模型类
-    :return:
-    """
-    for i in range(len(models)):
-        models[i].id = i
-        yield models[i]
 
 
 class ArticlesEditorModelForm(forms.ModelForm):
@@ -385,7 +375,10 @@ class BlogView(View):
             blog = Articles.objects.get(blog_id=blog_id)
         except Articles.DoesNotExist:
             raise Http404()
-        comments = blog.comments_set.all().order_by('-create_time')
+
+        comments_count = blog.comments_set.count()
+        print(comments_count)
+
         # 不是自己浏览则浏览次数加一
         if not request.user == blog.author_name:
             look_times = blog.look_times + 1
@@ -393,7 +386,7 @@ class BlogView(View):
             Articles.objects.filter(blog_id=blog_id).update(look_times=look_times)
             blog = Articles.objects.get(blog_id=blog_id)
         form = CommentsEditorModelForm()
-        info = {'blog': blog, 'comments': id_add(comments), 'form': form, 'path': request.path}
+        info = {'blog': blog, 'comments_count': comments_count, 'form': form, 'path': request.path}
         # 判断有无删除权限
         if request.user == blog.author_name:
             info['delete_able'] = True
@@ -535,13 +528,34 @@ class BlogDelete(LoginRequiredMixIn, View):
         return redirect(reverse('blog:user_blog'))
 
 
-class CommentEdit(LoginRequiredMixIn, View):
+class CommentEdit(View):
     """
     评论提交类视图
     """
+    def get(self, request):
+        blog_id = request.GET.get('blog_id', 'bad guy')
+        try:
+            blog = Articles.objects.get(blog_id=blog_id)
+        except Articles.DoesNotExist:
+            raise Http404()
+
+        comments = blog.comments_set.all().order_by('-create_time')
+
+        try:
+            page = int(request.GET.get('page', 1))
+        except (ValueError, TypeError):
+            page = 1
+
+        comments_page = Paginator(comments, 10)
+        rendered = render_to_string('comments.html', {'comments': comments_page.page(page)})
+
+        return JsonResponse({'comment': rendered})
+
     def post(self, request):
         if not request.user.is_active:
             raise Http404('账户未激活，请查看激活邮件')
+
+        # # TODO ajax提交评论
         blog_id = request.GET.get('blog_id', '')
         if blog_id:
             try:

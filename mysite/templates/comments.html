@@ -1,0 +1,24 @@
+{% load static %}
+{% for comment in comments.object_list %}
+    <blockquote class="blockquote mb-0">
+        <div id="{{ forloop.counter0 }}-comments-{{ comments.number }}">
+            <textarea style="display:none;">{{ comment.content }}</textarea>
+        </div>
+        <script type="text/javascript">
+            $(function() {
+
+                editormd.markdownToHTML("{{ forloop.counter0 }}-comments-{{ comments.number }}", {
+                    path: "{% static  'mdeditor/js/lib/' %}",
+                    emoji:true,
+                });
+            });
+        </script>
+    <footer class="blockquote-footer">by <a href="{% url 'blog:other_home' comment.commenter.user_id %}">{{ comment.commenter }} {{ comment.create_time }}</a></footer>
+    </blockquote>
+    <hr>
+    {% empty %}
+    <h3>还没有评论</h3>
+  {% endfor %}
+{% if comments.has_next %}
+  <a id="more_comments" href="javascript:more_comments({{ comments.next_page_number }})" >查看更多</a>
+  {% endif %}
