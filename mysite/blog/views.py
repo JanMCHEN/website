@@ -15,7 +15,6 @@ from django.db.models import Q              # or查询
 from django.core.paginator import Paginator
 
 from celery_tasks.task import send_email
-from markdown import markdown
 
 # 加密模块
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -34,6 +33,7 @@ def get_user_info(user, self=True):
         if not self:
             # 不是用户自己只获取公开的博客
             blog_all = blog_all.filter(is_secret=False)
+            info['not_self'] = True
         # 用户评论数
         info['comment_count'] = user.comments_set.all().count()
     except:
@@ -76,14 +76,15 @@ def active_email(user):
 
 
 def md_html(contents):
-    for content in contents:
-        content.content = markdown(content.content, extensions=['markdown.extensions.codehilite',
-                                                                'markdown.extensions.toc',
-                                                                'markdown.extensions.extra'])
+    for i, content in enumerate(contents):
+        # content.content = markdown(content.content, extensions=['markdown.extensions.extra',
+        #                                                         'markdown.extensions.codehilite',
+        #                                                         'markdown.extensions.toc'])
+        content.id = i
         yield content
 
 
-class ArticlesUeditorModelForm(forms.ModelForm):
+class ArticlesEditorModelForm(forms.ModelForm):
     description = forms.TextInput()
 
     class Meta:
@@ -96,7 +97,7 @@ class ArticlesUeditorModelForm(forms.ModelForm):
         }
 
 
-class CommentsUeditorModelForm(forms.ModelForm):
+class CommentsEditorModelForm(forms.ModelForm):
     class Meta:
         model = Comments
         fields = ('content',)
@@ -312,7 +313,8 @@ class OtherBlog(View):
             # 页码超出范围则置为1
             page = 1
 
-        return render(request, 'blog_list.html', {'blog_page': blog_page.page(page), 'edit_stop': True, 'username': user.username})
+        return render(request, 'blog_list.html', {'blog_page': blog_page.page(page),
+                                                  'edit_stop': True, 'username': user.username})
 
 
 class UserView(LoginRequiredMixIn, View):
@@ -361,7 +363,6 @@ class OtherHome(View):
             # 如果是本人访问则跳转到自己的详情页
             return redirect(reverse('blog:user_info'))
         info = get_user_info(user, False)
-        info['not_self'] = True
 
         return render(request, 'user_info.html', info)
 
@@ -382,7 +383,7 @@ class BlogView(View):
             # 不更新时间
             Articles.objects.filter(blog_id=blog_id).update(look_times=look_times)
             blog = Articles.objects.get(blog_id=blog_id)
-        form = CommentsUeditorModelForm()
+        form = CommentsEditorModelForm()
         info = {'blog': blog, 'comments': md_html(comments), 'form': form, 'path': request.path}
         # 判断有无删除权限
         if request.user == blog.author_name:
@@ -470,17 +471,17 @@ class BlogAdd(LoginRequiredMixIn, View):
             # 有则判断博客存在否并提交给post
             try:
                 blog = Articles.objects.get(blog_id=request.GET.get('blog_id'))
-                form = ArticlesUeditorModelForm(instance=blog)
+                form = ArticlesEditorModelForm(instance=blog)
             except Articles.DoesNotExist:
                 raise Http404('找不到文章')
         else:
-            form = ArticlesUeditorModelForm()
+            form = ArticlesEditorModelForm()
         return render(request, 'blog_edit.html', {'form': form})
 
     def post(self, request):
         if not request.user.is_active:
             raise Http404('账户未激活，请查看激活邮件')
-        form = ArticlesUeditorModelForm(request.POST)
+        form = ArticlesEditorModelForm(request.POST)
         if not form.is_valid():
             return render(request, 'blog_edit.html', {'form': form})
 
@@ -517,7 +518,7 @@ class BlogDelete(LoginRequiredMixIn, View):
         blog_id = request.GET.get('blog')
         try:
             a = request.user.articles_set.filter(pk=blog_id).delete()
-            print('sucessful', a)
+            # print('sucessful', a)
         except Exception as e:
             print(e)
         return redirect(reverse('blog:user_blog'))
@@ -538,7 +539,7 @@ class CommentEdit(LoginRequiredMixIn, View):
             except Articles.DoesNotExist:
                 raise Http404()
 
-            form = CommentsUeditorModelForm(request.POST)
+            form = CommentsEditorModelForm(request.POST)
             content = form.data.get('content')
             if not content:
                 raise Http404('提交错误')

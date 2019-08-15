@@ -18,9 +18,7 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/zuidreaming/', admin.site.urls),
-
-    # url(r'^ueditor/',include('DjangoUeditor.urls' )),
-    path('ueditor/', include('DjangoUeditor.urls')),
+    path('mdeditor/', include('mdeditor.urls')),
 
     path('search/', include('haystack.urls')),
     path('proxy/', include(('proxypool.urls', 'proxypool.proxy'), namespace='proxy')),

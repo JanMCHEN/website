@@ -1,7 +1,7 @@
 # coding:utf-8
 from django.urls import path
-from .views import UploadView
+from .views import UploadViewFDFS
 
 urlpatterns = [
-    path('uploads/', UploadView.as_view(), name='uploads'),
+    path('uploads/', UploadViewFDFS.as_view(), name='uploads'),
 ]

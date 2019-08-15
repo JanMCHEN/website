@@ -39,8 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # django-u-editor 富文本编辑器
-    'DjangoUeditor',
     'mdeditor',
 
     # haystack全文搜索框架
@@ -189,16 +187,19 @@ CUSTOM_STORAGE_OPTIONS = {
     'BASE_URL': SERVER_IP + ':8888/',
 }
 
+# markdown 配置
 MDEDITOR_CONFIGS = {'less': {
     'width': '80%',
-    'height': 100,
+    'height': 150,
     'toolbar': ["undo", "redo", "|",
                 "bold", "del", "italic", "quote",
                 "h3", "h5", "h6", "|",
                 "list-ul", "list-ol", "hr", "|",
                 "link", "reference-link", "image", "code", "preformatted-text", "code-block", "table", "datetime",
-                "emoji", "html-entities", "pagebreak", "|",
+                "emoji", "html-entities", "|",
                 "||", "preview", "watch"],
+    'preview_theme': 'default',
+    'placeholder': '说说你的想法',
 
 }, }
 

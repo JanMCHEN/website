@@ -31,23 +31,41 @@
                 }}
     </script>
     <script type="text/javascript">
-                    function likes_blog(){
-                    $.ajaxSetup({
-                        data:{csrfmiddlewaretoken:'{{ csrf_token }}'},});
-                   $.ajax({
-                        type:'POST',
-                        dataType:'json',
-                        url:'{% url 'blog:like' blog.blog_id  %}',
-                        success:function(data){
-                            if(data.msg == 'ok'){
-                                    $("#blog_like").html(data.likes)
-                                }
-                            else{
-                                alert(data.msg);
-                                }
-                            }
-                            });
+        function likes_blog(){
+        $.ajaxSetup({
+            data:{csrfmiddlewaretoken:'{{ csrf_token }}'},});
+       $.ajax({
+            type:'POST',
+            dataType:'json',
+            url:'{% url 'blog:like' blog.blog_id  %}',
+            success:function(data){
+                if(data.msg == 'ok'){
+                        $("#blog_like").html(data.likes)
                     }
+                else{
+                    alert(data.msg);
+                    }
+                }
+                });
+        }
+    </script>
+    <script type="text/javascript">
+    $(function() {
+
+	    editormd.markdownToHTML("md2html", {
+            path: "{% static  'mdeditor/js/lib/' %}",
+            tocm: true,
+            emoji:true,
+            flowChart: true,
+            sequenceDiagram: true,
+            pageBreak: true,
+            tex: true,
+            taskList:true,
+            //markdown : "1",// Also, you can dynamic set Markdown text
+            htmlDecode : true,  // Enable / disable HTML tag encode.
+            // htmlDecode : "style,script,iframe",  // Note: If enabled, you should filter some dangerous HTML tags for website security.
+        });
+    });
     </script>
 {% endblock %}
 {% block mainbody %}
@@ -58,12 +76,12 @@
     <a href="{% url 'blog:other_blog' blog.author_name.user_id %}">{{ blog.author_name }}的博客</a>
   </h3>
 
-  <div class="blog-post">
+  <div class="blog-post" style="color: #000000">
     <h1 class="blog-post-title">{{ blog.title }}</h1>
     <h2 class="blog-post-meta">{{ blog.description }}</h2>
     <p class="blog-post-meta">{{ blog.create_time }} by <a href="{% url 'blog:other_home' blog.author_name.user_id %}">{{ blog.author_name }}</a></p>
-    <p class="blog-post-meta">{{ blog.update_time }}更新<span class="badge badge-primary badge-pill">{{ blog.look_times }}阅读</span>
-        <li><span class="badge badge-primary badge-pill" id="blog_like">{{ blog.love }}</span><a href="javascript:likes_blog()" >喜欢</a></li>
+    <p class="blog-post-meta">{{ blog.update_time }}更新<span class="badge badge-primary badge-pill">{{ blog.look_times }}浏览👀</span>
+        <li><span class="badge badge-primary badge-pill" id="blog_like">{{ blog.love }}</span><a href="javascript:likes_blog()" >👍</a></li>
         {% if delete_able %}
         <li>
             <a href="{% url 'blog:blog_add' %}?blog_id={{ blog.blog_id }}">编辑</a>
@@ -100,7 +118,19 @@
   {% for comment in comments %}
     <div class="markdown-body editormd-preview-container">
     <blockquote class="blockquote mb-0">
-    <p>{{ comment.content|safe }}</p>
+{#    <p>{{ comment.content|safe }}</p>#}
+        <div id="{{ comment.id }}-comments-md">
+            <textarea style="display:none;">{{ comment.content }}</textarea>
+        </div>
+        <script type="text/javascript">
+            $(function() {
+
+                editormd.markdownToHTML("{{ comment.id }}-comments-md", {
+                    path: "{% static  'mdeditor/js/lib/' %}",
+                    emoji:true,
+                });
+            });
+        </script>
     <footer class="blockquote-footer">by <a href="{% url 'blog:other_home' comment.commenter.user_id %}">{{ comment.commenter }} {{ comment.create_time }}</a></footer>
     </blockquote>
     <hr>
@@ -113,22 +143,4 @@
     </div>
 </div>
 </main>
-    <script src="{% static  'mdeditor/js/lib/marked.min.js' %}"></script>
-  <script type="text/javascript">
-    $(function() {
-
-	    editormd.markdownToHTML("md2html", {
-            path: "{% static  'mdeditor/js/lib/' %}",
-            tocm: true,
-            emoji:true,
-            flowChart: true,
-            sequenceDiagram: true,
-            pageBreak: true,
-            tex: true,
-            //markdown : "1",// Also, you can dynamic set Markdown text
-            htmlDecode : true,  // Enable / disable HTML tag encode.
-            // htmlDecode : "style,script,iframe",  // Note: If enabled, you should filter some dangerous HTML tags for website security.
-        });
-    });
-    </script>
 {% endblock %}

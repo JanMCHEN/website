@@ -16,7 +16,7 @@ DEFAULT_CONFIG = {
                              "PNG", "bmp", "BMP", "webp", "WEBP"],
     'image_folder': 'editor',
     'theme': 'default',  # dark / default
-    'preview_theme': 'dark',  # dark / default
+    'preview_theme': 'default',  # dark / default
     'editor_theme': 'default',  # pastel-on-dark / default
     'toolbar_autofixed': True,
     'search_replace': True,
@@ -27,7 +27,9 @@ DEFAULT_CONFIG = {
     'language': 'zh',  # zh / en
     'watch': True,  # Live preview
     'lineWrapping': False,  # lineWrapping
-    'lineNumbers': False  # lineNumbers
+    'lineNumbers': True,  # lineNumbers,
+    'taskList': True,
+    'placeholder': 'Enjoy Markdown! coding now...',
 }
 
 
