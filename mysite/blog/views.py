@@ -92,7 +92,7 @@ class ArticlesEditorModelForm(forms.ModelForm):
 
         # 自定义表单格式
         widgets = {
-            'description': forms.Textarea(attrs={'cols': 50, 'rows': 2, 'placeholder': '为空时自动生成摘要'}),
+            'description': forms.Textarea(attrs={'cols': 100, 'rows': 1, 'placeholder': '为空时自动生成摘要'}),
         }
 
 
@@ -377,7 +377,6 @@ class BlogView(View):
             raise Http404()
 
         comments_count = blog.comments_set.count()
-        print(comments_count)
 
         # 不是自己浏览则浏览次数加一
         if not request.user == blog.author_name:
@@ -528,7 +527,7 @@ class BlogDelete(LoginRequiredMixIn, View):
         return redirect(reverse('blog:user_blog'))
 
 
-class CommentEdit(View):
+class CommentEdit(LoginRequiredMixIn, View):
     """
     评论类视图
     """

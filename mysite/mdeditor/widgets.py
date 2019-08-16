@@ -67,7 +67,7 @@ class MDEditorWidget(forms.Textarea):
                 "mdeditor/js/lib/jquery.flowchart.min.js",
 
 
-                "mdeditor/js/editormd.min.js",
+                "mdeditor/js/editormd.js",
 
 
             ))

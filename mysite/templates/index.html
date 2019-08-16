@@ -9,18 +9,23 @@
             if (scrollTop + windowHeight === scrollHeight) {
                 const page = Number($("#more_blog").attr("current_page"));
                 if (page > 0){
-                $.ajax({
-                type:'GET',
-                dataType:'json',
-                url:'{% url 'blog:ajax' 'blogs'  %}?page='+page,
-                success:function(data){
-                        $("#more_blog").append(data.rendered);
-                        $("#more_blog").attr("current_page", data.page);
-                    }
-                    });
+                more_blogs(page);
                 }
             }
         });
+    </script>
+    <script type="text/javascript">
+    function more_blogs(page){
+        $.ajax({
+            type:'GET',
+            dataType:'json',
+            url:'{% url 'blog:ajax' 'blogs'  %}?page='+page,
+            success:function(data){
+                    $("#more_blog").append(data.rendered);
+                    $("#more_blog").attr("current_page", data.page);
+                }
+                });
+    }
     </script>
 <div class="jumbotron p-4 p-md-5 text-white rounded bg-purple">
     <div class="col-md-6 px-0">
@@ -45,6 +50,9 @@
   <div class="my-3 p-3 bg-white rounded shadow-sm" id="more_blog" current_page="1">
     <h6 class="border-bottom border-gray pb-2 mb-0">最近更新</h6>
   </div>
+    <script type="text/javascript">
+          $("#more_blog").load(more_blogs(1))
+      </script>
 
 </main>
   </article>

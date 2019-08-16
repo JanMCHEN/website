@@ -11,8 +11,12 @@ class MessageAdmin(admin.ModelAdmin):
     list_display = ['user', 'from_who', 'content']
 
 
+class CommentsAdmin(admin.ModelAdmin):
+    list_display = ['commenter', 'article']
+
+
 admin.site.register(User)
 admin.site.register(Articles, ArticlesAdmin)
-admin.site.register(Comments)
+admin.site.register(Comments, CommentsAdmin)
 admin.site.register(Share)
 admin.site.register(Message, MessageAdmin)

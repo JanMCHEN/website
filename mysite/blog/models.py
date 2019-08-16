@@ -29,13 +29,16 @@ class Articles(BaseModel):
     """
     author_name = models.ForeignKey('User', verbose_name='作者', on_delete=models.CASCADE)
     blog_id = models.CharField(verbose_name='文章标识符', default=str(uuid1()).split('-')[0], max_length=15)
-    title = models.CharField(max_length=50, verbose_name='文章标题')
+    title = models.CharField(max_length=100, verbose_name='文章标题')
     body = MDTextField(blank=False, verbose_name='正文')
 
     love = models.IntegerField(default=0, verbose_name='点赞人数')
     look_times = models.IntegerField(default=0, verbose_name='浏览次数')
     is_secret = models.BooleanField(default=False, verbose_name='仅自己可见')
-    description = models.CharField(verbose_name='摘要', default='', max_length=50, blank=True)
+    description = models.CharField(verbose_name='摘要', default='', max_length=200, blank=True)
+
+    def __str__(self):
+        return self.title
 
     class Meta:
         db_table = 'df_articles'
@@ -52,6 +55,9 @@ class Comments(BaseModel):
     # 新加一个字段时注意要有default
     content = MDTextField(blank=False, config_name='less', default='', verbose_name='评论')
     love = models.IntegerField(default=0, verbose_name='赞同人数')
+
+    def __str__(self):
+        return str(self.article) + ' from ' + str(self.commenter)
 
     class Meta:
         db_table = 'df_comments'
