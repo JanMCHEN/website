@@ -12,6 +12,7 @@ import random
 from uuid import uuid1
 from utils.mixin import LoginRequiredMixIn
 from django.db.models import Q              # or查询
+from django.core.cache import cache         # 设置缓存
 # 分页模块
 from django.core.paginator import Paginator
 
@@ -119,20 +120,20 @@ class SharePostForm(forms.ModelForm):
 
 
 class Index(View):
-    '''主界面类视图'''
+    """主界面类视图"""
     def get(self, request):
-        try:
-            # 首页大图博客
-            blog_index = Articles.objects.get(blog_id='top')
-        except:
-            blog_index = Articles.objects.get(blog_id='1')       
-        blog = Articles.objects.filter(is_secret=False)
-        blog_love = Paginator(blog.order_by('love'), 5).page(1)
-        blog_time = Paginator(blog.order_by('-update_time'), 10).page(1)
-        share = Paginator(Share.objects.all().order_by('-update_time'), 2).page(1)
+        blogs = cache.get('index_cache')
+        if blogs is None:
+            blogs = Articles.objects.filter(blog_id__in=['1', '2', '3'])
+            for i, blog in enumerate(blogs):
+                blog.img = 'images/img%d.jpg' % (i+1)
+                if i == 0:
+                    blog.active = 'active'
 
-        return render(request, 'index.html', {'blog_index': blog_index, 'blog_time': blog_time,
-                                              'blog_like': blog_love, 'share': share})
+            # 设置缓存   key         value   timeout/s
+            cache.set('index_cache', blogs, timeout=3600)
+
+        return render(request, 'index.html', {'blogs': blogs})
 
 
 class About(View):
@@ -468,11 +469,17 @@ class BlogAdd(LoginRequiredMixIn, View):
         if not request.user.is_active:
             raise Http404('账户未激活，请查看激活邮件')
         # 判断url后面'？blog_id='有无内容决定是添加博客还是编辑博客
-        if request.GET.get('blog_id'):
+        blog_id = request.GET.get('blog_id')
+        if blog_id:
             # 有则判断博客存在否并提交给post
             try:
-                blog = Articles.objects.get(blog_id=request.GET.get('blog_id'))
+                blog = Articles.objects.get(blog_id=blog_id)
                 form = ArticlesEditorModelForm(instance=blog)
+
+                # 修改了主页显示的博客时将缓存删除
+                if blog_id in {'1', '2', '3'}:
+                    cache.delete('index_cache')
+
             except Articles.DoesNotExist:
                 raise Http404('找不到文章')
         else:

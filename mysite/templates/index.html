@@ -8,7 +8,7 @@
             var windowHeight = $(this).height();
             if (scrollTop + windowHeight === scrollHeight) {
                 const page = Number($("#more_blog").attr("current_page"));
-                if (page > 0){
+                if (page !== 0){
                 more_blogs(page);
                 }
             }
@@ -19,7 +19,7 @@
         $.ajax({
             type:'GET',
             dataType:'json',
-            url:'{% url 'blog:ajax' 'blogs'  %}?page='+page,
+            url:'{% url 'blog:ajax' 'blogs'  %}?page=' + page,
             success:function(data){
                     $("#more_blog").append(data.rendered);
                     $("#more_blog").attr("current_page", data.page);
@@ -27,17 +27,34 @@
                 });
     }
     </script>
-<div class="jumbotron p-4 p-md-5 text-white rounded bg-purple">
-    <div class="col-md-6 px-0">
-      <h1 class="display-4 font-italic">dreaming等你</h1>
-      {% if blog_index %}
-      <p class="lead my-3">{{ blog_index.description }}</p>
-        <p class="lead mb-0"><a href="{% url 'blog:blog' blog_index.blog_id %}" class="text-white font-weight-bold">了解更多...</a></p>
-        {% else %}
-        <p class="lead my-3">欢迎</p>
-        {% endif %}    
+<div id="carouselExampleCaptions" class="carousel slide" data-ride="carousel">
+    <ol class="carousel-indicators">
+        {% for blog in blogs %}
+            <li data-target="#carouselExampleCaptions" data-slide-to="{{ forloop.counter0 }}" class="{{ blog.active }}"></li>
+        {% endfor %}
+    </ol>
+    <div class="carousel-inner">
+        {% for blog in blogs %}
+      <div class="carousel-item {{ blog.active }}">
+        <img class="d-block w-100 " src="{% static blog.img %}">
+        <div class="carousel-caption d-none d-md-block">
+            <a href="{% url 'blog:blog' blog.blog_id %}">
+              <h5><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">{{ blog.title }}</font></font></h5>
+              <p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">{{ blog.description }}</font></font></p>
+            </a>
+        </div>
+      </div>
+        {% endfor %}
     </div>
-</div>
+    <a class="carousel-control-prev" href="#carouselExampleCaptions" role="button" data-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="sr-only"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">以前</font></font></span>
+    </a>
+    <a class="carousel-control-next" href="#carouselExampleCaptions" role="button" data-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="sr-only"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">下一个</font></font></span>
+    </a>
+  </div>
 <article>
 <main role="main" class="container">
   <div class="d-flex align-items-center p-3 my-3 text-white-50 bg-purple rounded shadow-sm">
