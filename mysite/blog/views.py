@@ -530,27 +530,8 @@ class BlogDelete(LoginRequiredMixIn, View):
 
 class CommentEdit(View):
     """
-    评论提交类视图
+    评论类视图
     """
-    def get(self, request):
-        blog_id = request.GET.get('blog_id', 'bad guy')
-        try:
-            blog = Articles.objects.get(blog_id=blog_id)
-        except Articles.DoesNotExist:
-            raise Http404()
-
-        comments = blog.comments_set.all().order_by('-create_time')
-
-        try:
-            page = int(request.GET.get('page', 1))
-        except (ValueError, TypeError):
-            page = 1
-
-        comments_page = Paginator(comments, 10)
-        rendered = render_to_string('comments.html', {'comments': comments_page.page(page)})
-
-        return JsonResponse({'comment': rendered})
-
     def post(self, request):
         if not request.user.is_active:
             raise Http404('账户未激活，请查看激活邮件')
@@ -779,20 +760,6 @@ class Logout(View):
         return redirect(reverse('blog:login'))
 
 
-# TODO 修改资料还未实现
-class Forget(View):
-    '''找回密码类视图，未实现'''
-    def get(self, request):
-        return render(request, 'sign/forget.html')
-
-    def post(self, request):
-        # 接收数据
-        username = request.POST.get('username')
-        # 其他验证身份方式  验证码 发修改邮件
-        # newpass = request.POST.get('pass')
-        return redirect(reverse('blog:login'))
-
-
 class UserActive(View):
     def get(self, request):
         token = request.GET.get('token')
@@ -813,11 +780,39 @@ class UserActive(View):
             return redirect(reverse('blog:index'))
 
 
+class Ajax(View):
+    def get_comment(self, blog, page=1, nums=10):
 
+        comments = blog.comments_set.all().order_by('-create_time')
+        comments_page = Paginator(comments, nums)
+        return render_to_string('comments.html', {'comments': comments_page.page(page)})
 
+    def get_blogs(self, page=1, nums=10):
+        blog_all = Articles.objects.filter(is_secret=False).order_by('-update_time')
+        blog_page = Paginator(blog_all, nums)
+        page_item = blog_page.page(page)
+        if page_item.has_next():
+            page = page_item.next_page_number()
+        else:
+            page = 0
+        return render_to_string('blog_index.html', {'blogs': page_item}), page
 
+    def get(self, request, types):
+        info = {}
+        try:
+            page = int(request.GET.get('page', 1))
+        except (ValueError, TypeError):
+            page = 1
 
+        if types == 'comments':
+            blog_id = request.GET.get('blog_id', 'bad guy')
+            try:
+                blog = Articles.objects.get(blog_id=blog_id)
+            except Articles.DoesNotExist:
+                raise Http404()
+            info['rendered'] = self.get_comment(blog, page)
 
+        elif types == 'blogs':
+            info['rendered'], info['page'] = self.get_blogs(page)
 
-
-
+        return JsonResponse(info)

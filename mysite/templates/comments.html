@@ -20,5 +20,7 @@
     <h3>还没有评论</h3>
   {% endfor %}
 {% if comments.has_next %}
-  <a id="more_comments" href="javascript:more_comments({{ comments.next_page_number }})" >查看更多</a>
+    <small class="d-block text-center">
+      <a id="more_comments" href="javascript:more_comments({{ comments.next_page_number }})" >查看更多</a>
+    </small>
   {% endif %}

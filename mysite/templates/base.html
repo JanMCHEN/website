@@ -16,11 +16,27 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link href="{% static 'css/blog.css' %}" rel="stylesheet">
     <link href="{% static 'css/offcanvas.css' %}" rel="stylesheet">
-      <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
 
     {% block js_file %}
+        <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+
+  <script src="{% static "js/jquery-3.3.1.min.js" %}" type="text/javascript"></script>
+    <script src="{% static "js/popper.min.js" %}" type="text/javascript"></script>
+    <script src="{% static "js/bootstrap.min.js" %}" type="text/javascript"></script>
+    <script type="text/javascript">
+        $('#exampleModal').on('show.bs.modal', function (event) {
+          var button = $(event.relatedTarget) // Button that triggered the modal
+          var recipient = button.data('whatever') // Extract info from data-* attributes
+          // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+          // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+          var modal = $(this)
+          modal.find('.modal-title').text('New message to ' + recipient)
+          // modal.find('.modal-body input').val(recipient)
+        })
+    </script>
     {% endblock %}
+
     <title>
         {% block title %}Dreaming Blog--成就梦想，分享你我{% endblock %}
     </title>
@@ -124,20 +140,5 @@
         <a href="">Back to top</a>
   </p>
 </footer>
-
-    <script src="{% static "js/jquery-3.3.1.min.js" %}" type="text/javascript"></script>
-    <script src="{% static "js/popper.min.js" %}" type="text/javascript"></script>
-    <script src="{% static "js/bootstrap.min.js" %}" type="text/javascript"></script>
-    <script type="text/javascript">
-        $('#exampleModal').on('show.bs.modal', function (event) {
-          var button = $(event.relatedTarget) // Button that triggered the modal
-          var recipient = button.data('whatever') // Extract info from data-* attributes
-          // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
-          // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
-          var modal = $(this)
-          modal.find('.modal-title').text('New message to ' + recipient)
-          // modal.find('.modal-body input').val(recipient)
-        })
-    </script>
   </body>
 </html>
