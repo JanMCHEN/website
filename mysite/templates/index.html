@@ -9,6 +9,7 @@
             if (scrollTop + windowHeight === scrollHeight) {
                 const page = Number($("#more_blog").attr("current_page"));
                 if (page !== 0){
+                    $("#more_blog").attr("current_page", 0);
                 more_blogs(page);
                 }
             }

@@ -28,14 +28,13 @@ class Articles(BaseModel):
     用户发表文章模型类
     """
     author_name = models.ForeignKey('User', verbose_name='作者', on_delete=models.CASCADE)
-    blog_id = models.CharField(verbose_name='文章标识符', default=str(uuid1()).split('-')[0], max_length=15)
     title = models.CharField(max_length=100, verbose_name='文章标题')
+    description = models.CharField(verbose_name='摘要', default='', max_length=200, blank=True)
     body = MDTextField(blank=False, verbose_name='正文')
-
+    blog_id = models.CharField(verbose_name='文章标识符', default=str(uuid1()).split('-')[0], max_length=15)
     love = models.IntegerField(default=0, verbose_name='点赞人数')
     look_times = models.IntegerField(default=0, verbose_name='浏览次数')
     is_secret = models.BooleanField(default=False, verbose_name='仅自己可见')
-    description = models.CharField(verbose_name='摘要', default='', max_length=200, blank=True)
 
     def __str__(self):
         return self.title

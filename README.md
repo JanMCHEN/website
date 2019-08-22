@@ -1,4 +1,4 @@
-# mywebsite
+# DreamingBlog
 	django 搭建个人博客网站，nginx负载均衡在两台服务器上有部署，支持注册、登录、写博客、点赞、收藏、上传头像、ip代理池获取、发图、评论等，集成百度ueditor编辑器，fastdfs分布式存储、haystack全文搜索
 
 ## 部署过程
